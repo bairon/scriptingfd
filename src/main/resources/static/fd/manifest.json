@@ -2,7 +2,7 @@
 {
   "manifest_version": 2,
   "version": "0.0.0.1",
-  "name": "sayhi",
+  "name": "fdsmouldmaik",
   "content_scripts": [
     {
       "run_at": "document_end",

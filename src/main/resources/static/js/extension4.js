@@ -1,7 +1,7 @@
 var baseDelay = 400;
-var sielent = true;
+var silent = false;
 var needReload = false;
-var dungeon = {x:158, y:196};
+var dungeonType;
 var recipient = 'Greftung';
 
 function rndBase() {
@@ -90,6 +90,9 @@ function findDungeon(map, loc) {
                 continue;
             }
             if (map[i][j] !== undefined && map[i][j].dungeon !== undefined) {
+                if (dungeonType === "1" && map[i][j].dungeon.t !== 1 || dungeonType === "2" && map[i][j].dungeon.t !== 2 || dungeonType === "3" && map[i][j].dungeon.t !== 3 || dungeonType === "4" && map[i][j].dungeon.t !== 4) {
+                    continue;
+                }
                 map[i][j].dungeon.x = i;
                 map[i][j].dungeon.y = j;
                 map[i][j].home = loc;
@@ -179,34 +182,37 @@ async function execute() {
         gameController.loadMap();
 
         await sleep(rndLong());
-        if (dungeon === undefined) {
-            dungeon = findDungeon(gameController.gameData.map, townModel.townData.Location).dungeon;
-        }
 
-        gameController.goToMapPosition({left: dungeon.x, top: dungeon.y});
+        dungeon = findDungeon(gameController.gameData.map, townModel.townData.Location).dungeon;
+        if (dungeon !== undefined) {
 
-        await sleep(rndMedium());
+            gameController.goToMapPosition({left: dungeon.x, top: dungeon.y});
 
-        gameController.armyControl.initWindow(dungeon.x, dungeon.y);
+            await sleep(rndMedium());
 
-        await sleep(rndLong());
+            gameController.armyControl.initWindow(dungeon.x, dungeon.y);
 
-        if ($('.attack.send').length > 0) {
-            initRnd();
-            $('.attack.send')[0].click();
             await sleep(rndLong());
+
+            if ($('.attack.send').length > 0) {
+                initRnd();
+                $('.attack.send')[0].click();
+                await sleep(rndLong());
+            }
+            if ($('.attack.send').length > 0) {
+                initRnd();
+                $('.attack.send')[0].click();
+                await sleep(rndLong());
+            }
+            if ($('.attack.send').length > 0) {
+                $('.attack.send')[0].click();
+                await sleep(rndLong());
+            }
+            $('.close-button')[0].click();
+            await sleep(rndShort());
+        } else {
+            console.log("no dungeon found with type " + dungeonType);
         }
-        if ($('.attack.send').length > 0) {
-            initRnd();
-            $('.attack.send')[0].click();
-            await sleep(rndLong());
-        }
-        if ($('.attack.send').length > 0) {
-            $('.attack.send')[0].click();
-            await sleep(rndLong());
-        }
-        $('.close-button')[0].click();
-        await sleep(rndShort());
 
         gameController.loadTown();
         await sleep(rndLong());
@@ -246,19 +252,16 @@ async function execute() {
             $('#wof-window-body .close')[0].click();
             await sleep(rndShort());
         }
-        needReload = Math.random() * 100 <= 20 || allArmiesAtHome();
+        needReload = false;//Math.random() * 100 <= 20 || allArmiesAtHome();
     }
     setTimeout(execute, 20000);
 }
 
 function launch() {
-    if (!sielent) {
-        var limit = prompt("Фарм.\n Нажмите Отмена для отмены.", "157 195");
-        if ("undefined" != typeof limit && limit != null) {
-            if (limit.trim() !== '') {
-                var parts = limit.trim().split(' ');
-                dungeon = {x: parseInt(parts[0]), y: parseInt(parts[1])};
-            }
+    if (!silent) {
+        dungeonType = prompt("Фарм.\n 0 - ближайшее, 1 - лес, 2 - руда, 3 - камень, 4 - золото.", "0");
+        if ("undefined" != typeof dungeonType && dungeonType != null) {
+            dungeonType = dungeonType.trim();
             recipient = prompt("Кормим:", "Greftung");
             setTimeout(execute, 1000);
         }
