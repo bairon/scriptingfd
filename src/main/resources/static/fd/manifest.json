@@ -1,0 +1,13 @@
+
+{
+  "manifest_version": 2,
+  "version": "0.0.0.1",
+  "name": "sayhi",
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": ["https://s4.feodal.feogames.ru/frontend/view/*"],
+      "js": ["fd.js"]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+//rpgModel.canUseOtherTownsSupply = function(){return true};
