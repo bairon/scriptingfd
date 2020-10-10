@@ -4,6 +4,7 @@ var needReload = false;
 var dungeonType;
 var recipient = 'Greftung';
 var hire = true;
+var attack = true;
 var armyminimum;
 
 function rndBase() {
@@ -66,17 +67,21 @@ function armiesNotAtHome() {
     }
     return notAtHome;
 }
+
 var sqrt2 = Math.sqrt(2);
+
 function range(x1, y1, x2, y2) {
     var diagonals = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
     var streights = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1)) - diagonals;
     return diagonals * sqrt2 + streights;
 
 }
+
 function precious(t) {
     if (t === 4) return 0;
     return t - 1;
 }
+
 function dungeonCompare(a, b) {
     if (a.range < b.range) return -1;
     if (a.range > b.range) return 1;
@@ -115,8 +120,6 @@ async function execute() {
         if (needReload) {
             location.reload();
         }
-        gameController.loadTown();
-        await sleep(rndLong());
         $('#town-control-button')[0].click();
         await sleep(rndShort());
 
@@ -129,112 +132,112 @@ async function execute() {
             await sleep(rndMedium());
         }
 
-        initRnd();
-        $('.town-control-window div[type="armies"]')[0].click();
-        await sleep(rndShort());
-        if ($('.dismiss-button').length > 0) {
-            $('.dismiss-button')[0].click();
-            await sleep(rndMedium());
-        }
-        if ($('.dismiss-button').length > 0) {
-            $('.dismiss-button')[0].click();
-            await sleep(rndMedium());
-        }
-        if ($('.dismiss-button').length > 0) {
-            $('.dismiss-button')[0].click();
-            await sleep(rndMedium());
-        }
+        if (attack !== undefined && attack !== null) {
+            initRnd();
+            $('.town-control-window div[type="armies"]')[0].click();
+            await sleep(rndShort());
+            if ($('.dismiss-button').length > 0) {
+                $('.dismiss-button')[0].click();
+                await sleep(rndMedium());
+            }
+            if ($('.dismiss-button').length > 0) {
+                $('.dismiss-button')[0].click();
+                await sleep(rndMedium());
+            }
+            if ($('.dismiss-button').length > 0) {
+                $('.dismiss-button')[0].click();
+                await sleep(rndMedium());
+            }
 
-        var armySize = Math.round(townModel.townData.Troops[hire] / 4);
-        var armyQty = 4;
-        if (armySize < armyminimum) {
-            armySize = Math.round(townModel.townData.Troops[hire] / 3);
-            armyQty = 3;
-        }
-        if (armySize < armyminimum) {
-            armySize = Math.round(townModel.townData.Troops[hire] / 2);
-            armyQty = 2;
-        }
-        if (armySize < armyminimum) {
-            armySize = townModel.townData.Troops[hire];
-            armyQty = 1;
-        }
+            var armySize = Math.round(townModel.townData.Troops[hire] / 4);
+            var armyQty = 4;
+            if (armySize < armyminimum) {
+                armySize = Math.round(townModel.townData.Troops[hire] / 3);
+                armyQty = 3;
+            }
+            if (armySize < armyminimum) {
+                armySize = Math.round(townModel.townData.Troops[hire] / 2);
+                armyQty = 2;
+            }
+            if (armySize < armyminimum) {
+                armySize = townModel.townData.Troops[hire];
+                armyQty = 1;
+            }
 
-        initRnd();
-        $('.town-control-window div[type="createArmy"]')[0].click();
-        await sleep(rndShort());
-        if (armyQty > 3) {
-            $('div[troop-id="' + hire + '"] input').attr('value', armySize);
+            initRnd();
+            $('.town-control-window div[type="createArmy"]')[0].click();
+            await sleep(rndShort());
+            if (armyQty > 3) {
+                $('div[troop-id="' + attack + '"] input').attr('value', armySize);
+                await sleep(rndShort());
+                initRnd();
+                $('.create-army-button')[0].click();
+                await sleep(rndLong());
+            }
+            if (armyQty > 2) {
+                $('div[troop-id="' + attack + '"] input').attr('value', armySize);
+                await sleep(rndShort());
+                initRnd();
+                $('.create-army-button')[0].click();
+                await sleep(rndLong());
+            }
+            if (armyQty > 1) {
+                $('div[troop-id="' + attack + '"] input').attr('value', armySize);
+                await sleep(rndShort());
+                initRnd();
+                $('.create-army-button')[0].click();
+                await sleep(rndLong());
+            }
+            $('div[troop-id="' + attack + '"] .max-button')[0].click();
             await sleep(rndShort());
             initRnd();
             $('.create-army-button')[0].click();
             await sleep(rndLong());
-        }
-        if (armyQty > 2) {
-            $('div[troop-id="' + hire + '"] input').attr('value', armySize);
+            $('.town-control-window .close')[0].click();
+
             await sleep(rndShort());
-            initRnd();
-            $('.create-army-button')[0].click();
-            await sleep(rndLong());
-        }
-        if (armyQty > 1) {
-            $('div[troop-id="' + hire + '"] input').attr('value', armySize);
-            await sleep(rndShort());
-            initRnd();
-            $('.create-army-button')[0].click();
-            await sleep(rndLong());
-        }
-        $('div[troop-id="' + hire + '"] .max-button')[0].click();
-        await sleep(rndShort());
-        initRnd();
-        $('.create-army-button')[0].click();
-        await sleep(rndLong());
-        $('.town-control-window .close')[0].click();
 
-        await sleep(rndShort());
-
-        gameController.loadMap();
-
-        await sleep(rndLong());
-
-        dungeon = findDungeon(gameController.gameData.map, townModel.townData.Location).dungeon;
-        if (dungeon !== undefined) {
-
-            gameController.goToMapPosition({left: dungeon.x, top: dungeon.y});
-
-            await sleep(rndMedium());
-
-            gameController.armyControl.initWindow(dungeon.x, dungeon.y);
+            gameController.loadMap();
 
             await sleep(rndLong());
 
-            if ($('.attack.send').length > 0) {
-                initRnd();
-                $('.attack.send')[0].click();
+            dungeon = findDungeon(gameController.gameData.map, townModel.townData.Location).dungeon;
+            if (dungeon !== undefined) {
+
+                gameController.goToMapPosition({left: dungeon.x, top: dungeon.y});
+
+                await sleep(rndMedium());
+
+                gameController.armyControl.initWindow(dungeon.x, dungeon.y);
+
                 await sleep(rndLong());
+
+                if ($('.attack.send').length > 0) {
+                    initRnd();
+                    $('.attack.send')[0].click();
+                    await sleep(rndLong());
+                }
+                if ($('.attack.send').length > 0) {
+                    initRnd();
+                    $('.attack.send')[0].click();
+                    await sleep(rndLong());
+                }
+                if ($('.attack.send').length > 0) {
+                    initRnd();
+                    $('.attack.send')[0].click();
+                    await sleep(rndLong());
+                }
+                if ($('.attack.send').length > 0) {
+                    $('.attack.send')[0].click();
+                    await sleep(rndLong());
+                }
+                $('.close-button')[0].click();
+                await sleep(rndShort());
+            } else {
+                console.log("no dungeon found with type " + dungeonType);
             }
-            if ($('.attack.send').length > 0) {
-                initRnd();
-                $('.attack.send')[0].click();
-                await sleep(rndLong());
-            }
-            if ($('.attack.send').length > 0) {
-                initRnd();
-                $('.attack.send')[0].click();
-                await sleep(rndLong());
-            }
-            if ($('.attack.send').length > 0) {
-                $('.attack.send')[0].click();
-                await sleep(rndLong());
-            }
-            $('.close-button')[0].click();
-            await sleep(rndShort());
-        } else {
-            console.log("no dungeon found with type " + dungeonType);
         }
 
-        gameController.loadTown();
-        await sleep(rndLong());
         if (recipient !== undefined && recipient !== null) {
             var keep = {wood: 17000, iron: 10000, stone: 17000, gold: 15000};
             var wood = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.wood) - keep.wood));
@@ -285,6 +288,7 @@ function launch() {
             dungeonType = dungeonType.trim();
             recipient = prompt("Кормим:", "Greftung");
             hire = prompt("Найм: 1 - лансы, 3 - кава, 6 - алебарды ", "6");
+            attack = prompt("Атака: ", "6");
             armyminimum = prompt("Минимальнай отряд: ", "150");
             setTimeout(execute, 1000);
         }
