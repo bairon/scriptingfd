@@ -4,6 +4,7 @@ var needReload = false;
 var dungeonType;
 var recipient = 'Greftung';
 var hire = true;
+var armyminimum;
 
 function rndBase() {
     return Math.round(Math.random() * baseDelay + baseDelay);
@@ -284,6 +285,7 @@ function launch() {
             dungeonType = dungeonType.trim();
             recipient = prompt("Кормим:", "Greftung");
             hire = prompt("Найм: 1 - лансы, 3 - кава, 6 - алебарды ", "6");
+            armyminimum = prompt("Минимальнай отряд: ", "150");
             setTimeout(execute, 1000);
         }
     } else {
