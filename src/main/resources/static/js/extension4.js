@@ -149,18 +149,18 @@ async function execute() {
                 await sleep(rndMedium());
             }
 
-            var armySize = Math.round(townModel.townData.Troops[hire] / 4);
+            var armySize = Math.round(townModel.townData.Troops[attack] / 4);
             var armyQty = 4;
             if (armySize < armyminimum) {
-                armySize = Math.round(townModel.townData.Troops[hire] / 3);
+                armySize = Math.round(townModel.townData.Troops[attack] / 3);
                 armyQty = 3;
             }
             if (armySize < armyminimum) {
-                armySize = Math.round(townModel.townData.Troops[hire] / 2);
+                armySize = Math.round(townModel.townData.Troops[attack] / 2);
                 armyQty = 2;
             }
             if (armySize < armyminimum) {
-                armySize = townModel.townData.Troops[hire];
+                armySize = townModel.townData.Troops[attack];
                 armyQty = 1;
             }
 
