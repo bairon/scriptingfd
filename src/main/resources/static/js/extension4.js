@@ -122,9 +122,9 @@ async function execute() {
         if (hire !== undefined && hire !== null && Object.keys(townModel.townData.RecruitingList).length < 2) {
             $('.town-control-window div[type="troops"]')[0].click();
             await sleep(rndMedium());
-            $('div[troop-id="6"] .max')[0].click();
+            $('div[troop-id="' + hire + '"] .max')[0].click();
             await sleep(rndMedium());
-            $('div[troop-id="6"] .recruit')[0].click();
+            $('div[troop-id="' + hire + '"] .recruit')[0].click();
             await sleep(rndMedium());
         }
 
@@ -144,35 +144,46 @@ async function execute() {
             await sleep(rndMedium());
         }
 
-        var armySize = Math.round(townModel.townData.Troops[6] / 3);
-        var armyQty = 3;
-        if (armySize < 200) {
-            armySize = Math.round(townModel.townData.Troops[6] / 2);
+        var armySize = Math.round(townModel.townData.Troops[hire] / 4);
+        var armyQty = 4;
+        if (armySize < armyminimum) {
+            armySize = Math.round(townModel.townData.Troops[hire] / 3);
+            armyQty = 3;
+        }
+        if (armySize < armyminimum) {
+            armySize = Math.round(townModel.townData.Troops[hire] / 2);
             armyQty = 2;
         }
-        if (armySize < 200) {
-            armySize = townModel.townData.Troops[6];
+        if (armySize < armyminimum) {
+            armySize = townModel.townData.Troops[hire];
             armyQty = 1;
         }
 
         initRnd();
         $('.town-control-window div[type="createArmy"]')[0].click();
         await sleep(rndShort());
+        if (armyQty > 3) {
+            $('div[troop-id="' + hire + '"] input').attr('value', armySize);
+            await sleep(rndShort());
+            initRnd();
+            $('.create-army-button')[0].click();
+            await sleep(rndLong());
+        }
         if (armyQty > 2) {
-            $('div[troop-id="6"] input').attr('value', armySize);
+            $('div[troop-id="' + hire + '"] input').attr('value', armySize);
             await sleep(rndShort());
             initRnd();
             $('.create-army-button')[0].click();
             await sleep(rndLong());
         }
         if (armyQty > 1) {
-            $('div[troop-id="6"] input').attr('value', armySize);
+            $('div[troop-id="' + hire + '"] input').attr('value', armySize);
             await sleep(rndShort());
             initRnd();
             $('.create-army-button')[0].click();
             await sleep(rndLong());
         }
-        $('div[troop-id="6"] .max-button')[0].click();
+        $('div[troop-id="' + hire + '"] .max-button')[0].click();
         await sleep(rndShort());
         initRnd();
         $('.create-army-button')[0].click();
@@ -196,6 +207,11 @@ async function execute() {
 
             await sleep(rndLong());
 
+            if ($('.attack.send').length > 0) {
+                initRnd();
+                $('.attack.send')[0].click();
+                await sleep(rndLong());
+            }
             if ($('.attack.send').length > 0) {
                 initRnd();
                 $('.attack.send')[0].click();
@@ -267,7 +283,7 @@ function launch() {
         if ("undefined" != typeof dungeonType && dungeonType != null) {
             dungeonType = dungeonType.trim();
             recipient = prompt("Кормим:", "Greftung");
-            hire = prompt("Найм: ", "6");
+            hire = prompt("Найм: 1 - лансы, 3 - кава, 6 - алебарды ", "6");
             setTimeout(execute, 1000);
         }
     } else {
