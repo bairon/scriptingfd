@@ -217,41 +217,43 @@ async function execute() {
 
         gameController.loadTown();
         await sleep(rndLong());
-        var keep = {wood:17000, iron:10000, stone:17000, gold:15000};
-        var wood = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.wood) - keep.wood));
-        var iron = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.iron) - keep.iron));
-        var stone = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.stone) - keep.stone));
-        var gold = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.gold) - keep.gold));
+        if (recipient !== undefined) {
+            var keep = {wood: 17000, iron: 10000, stone: 17000, gold: 15000};
+            var wood = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.wood) - keep.wood));
+            var iron = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.iron) - keep.iron));
+            var stone = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.stone) - keep.stone));
+            var gold = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.gold) - keep.gold));
 
-        if (wood >= 1000 || iron >= 1000 || stone >= 1000 || gold >= 1000) {
+            if (wood >= 1000 || iron >= 1000 || stone >= 1000 || gold >= 1000) {
 
-            $('.system-button.commerce')[0].click();
-            await sleep(rndShort());
+                $('.system-button.commerce')[0].click();
+                await sleep(rndShort());
 
-            $('div[tab="send-resources"]')[0].click();
-            await sleep(rndShort());
+                $('div[tab="send-resources"]')[0].click();
+                await sleep(rndShort());
 
-            $('.senders-list>:contains("' + recipient + '")')[0].click();
-            await sleep(rndShort());
+                $('.senders-list>:contains("' + recipient + '")')[0].click();
+                await sleep(rndShort());
 
-            $('.all-max-button')[0].click();
-            await sleep(rndMedium());
+                $('.all-max-button')[0].click();
+                await sleep(rndMedium());
 
-            $('.resource input[title="wood"]').attr('value', wood);
-            await sleep(rndShort());
-            $('.resource input[title="iron"]').attr('value', iron);
-            await sleep(rndShort());
-            $('.resource input[title="stone"]').attr('value', stone);
-            await sleep(rndShort());
-            $('.resource input[title="gold"]').attr('value', gold);
-            await sleep(rndShort());
+                $('.resource input[title="wood"]').attr('value', wood);
+                await sleep(rndShort());
+                $('.resource input[title="iron"]').attr('value', iron);
+                await sleep(rndShort());
+                $('.resource input[title="stone"]').attr('value', stone);
+                await sleep(rndShort());
+                $('.resource input[title="gold"]').attr('value', gold);
+                await sleep(rndShort());
 
-            initRnd();
-            $('.send-resources .send-button')[0].click();
-            await sleep(rndLong());
+                initRnd();
+                $('.send-resources .send-button')[0].click();
+                await sleep(rndLong());
 
-            $('#wof-window-body .close')[0].click();
-            await sleep(rndShort());
+                $('#wof-window-body .close')[0].click();
+                await sleep(rndShort());
+            }
         }
         needReload = false;//Math.random() * 100 <= 20 || armiesNotAtHome() > 1;
     }
