@@ -217,7 +217,7 @@ async function execute() {
 
         gameController.loadTown();
         await sleep(rndLong());
-        if (recipient !== undefined) {
+        if (recipient !== undefined && recipient !== null) {
             var keep = {wood: 17000, iron: 10000, stone: 17000, gold: 15000};
             var wood = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.wood) - keep.wood));
             var iron = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.iron) - keep.iron));
