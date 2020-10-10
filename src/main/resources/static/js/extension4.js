@@ -54,14 +54,15 @@ function roundLessBy1000(x) {
     return thousands * 1000;
 }
 
-function allArmiesAtHome() {
+function armiesNotAtHome() {
+    var notAtHome = 0;
     for (let i in townModel.townData.Armies) {
         let army = townModel.townData.Armies[i];
         if (army.Status !== 0) {
-            return false;
+            notAtHome++;
         }
     }
-    return true;
+    return notAtHome;
 }
 var sqrt2 = Math.sqrt(2);
 function range(x1, y1, x2, y2) {
@@ -108,7 +109,7 @@ function findDungeon(map, loc) {
 
 async function execute() {
     await sleep(rndLong());
-    if (allArmiesAtHome()) {
+    if (armiesNotAtHome() <= 1) {
         if (needReload) {
             location.reload();
         }
@@ -252,7 +253,7 @@ async function execute() {
             $('#wof-window-body .close')[0].click();
             await sleep(rndShort());
         }
-        needReload = false;//Math.random() * 100 <= 20 || allArmiesAtHome();
+        needReload = false;//Math.random() * 100 <= 20 || armiesNotAtHome() > 1;
     }
     setTimeout(execute, 20000);
 }
