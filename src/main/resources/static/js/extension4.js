@@ -3,6 +3,7 @@ var silent = false;
 var needReload = false;
 var dungeonType;
 var recipient = 'Greftung';
+var hire = true;
 
 function rndBase() {
     return Math.round(Math.random() * baseDelay + baseDelay);
@@ -118,7 +119,7 @@ async function execute() {
         $('#town-control-button')[0].click();
         await sleep(rndShort());
 
-        if (Object.keys(townModel.townData.RecruitingList).length < 2) {
+        if (hire !== undefined && hire !== null && Object.keys(townModel.townData.RecruitingList).length < 2) {
             $('.town-control-window div[type="troops"]')[0].click();
             await sleep(rndMedium());
             $('div[troop-id="6"] .max')[0].click();
@@ -266,6 +267,7 @@ function launch() {
         if ("undefined" != typeof dungeonType && dungeonType != null) {
             dungeonType = dungeonType.trim();
             recipient = prompt("Кормим:", "Greftung");
+            hire = prompt("Найм: ", "6");
             setTimeout(execute, 1000);
         }
     } else {
