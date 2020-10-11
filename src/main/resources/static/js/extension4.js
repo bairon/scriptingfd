@@ -2,7 +2,7 @@ var baseDelay = 400;
 var silent = false;
 var needReload = false;
 var dungeonType;
-var recipient = 'Greftung';
+var recipient;
 var hire = true;
 var attack = true;
 var armyminimum;
@@ -57,11 +57,11 @@ function roundLessBy1000(x) {
     return thousands * 1000;
 }
 
-function armiesNotAtHome() {
+function farmingArmiesNotAtHome() {
     var notAtHome = 0;
     for (let i in townModel.townData.Armies) {
         let army = townModel.townData.Armies[i];
-        if (army.Status !== 0) {
+        if (army.Status && army.Name === 'Новая армия') {
             notAtHome++;
         }
     }
@@ -116,11 +116,12 @@ function findDungeon(map, loc) {
 
 async function execute() {
     await sleep(rndLong());
-    if (armiesNotAtHome() <= 1) {
+    if (farmingArmiesNotAtHome() <= 0) {
         if (needReload) {
             location.reload();
         }
-        $('#town-control-button')[0].click();
+        //$('#town-control-button')[0].click();
+        gameController.townControl.show();
         await sleep(rndShort());
 
         if (hire !== undefined && hire !== null && Object.keys(townModel.townData.RecruitingList).length < 2) {
@@ -136,6 +137,10 @@ async function execute() {
             initRnd();
             $('.town-control-window div[type="armies"]')[0].click();
             await sleep(rndShort());
+            if ($('.dismiss-button').length > 0) {
+                $('.dismiss-button')[0].click();
+                await sleep(rndMedium());
+            }
             if ($('.dismiss-button').length > 0) {
                 $('.dismiss-button')[0].click();
                 await sleep(rndMedium());
@@ -193,7 +198,8 @@ async function execute() {
             initRnd();
             $('.create-army-button')[0].click();
             await sleep(rndLong());
-            $('.town-control-window .close')[0].click();
+            //$('.town-control-window .close')[0].click();
+            gameController.townControl.close();
 
             await sleep(rndShort());
 
@@ -239,13 +245,13 @@ async function execute() {
         }
 
         if (recipient !== undefined && recipient !== null) {
-            var keep = {wood: 17000, iron: 10000, stone: 17000, gold: 15000};
+            var keep = {wood: 4000, iron: 5000, stone: 5000, gold: 5000};
             var wood = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.wood) - keep.wood));
             var iron = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.iron) - keep.iron));
             var stone = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.stone) - keep.stone));
             var gold = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.gold) - keep.gold));
 
-            if (wood >= 1000 || iron >= 1000 || stone >= 1000 || gold >= 1000) {
+            if (wood >= 20000 || iron >= 20000 || stone >= 20000 || gold >= 20000) {
 
                 $('.system-button.commerce')[0].click();
                 await sleep(rndShort());
@@ -276,23 +282,34 @@ async function execute() {
                 await sleep(rndShort());
             }
         }
-        needReload = false;//Math.random() * 100 <= 20 || armiesNotAtHome() > 1;
+        needReload = false;//Math.random() * 100 <= 20 || farmingArmiesNotAtHome() > 1;
     }
     setTimeout(execute, 20000);
 }
 
+/*function detectFarmingArmies() {
+    for (const armyid in townModel.townData.Armies) {
+        var army = townModel.townData.Armies[armyid];
+        if (army.Status) {
+            if (army.RouteId !== undefined && army.RouteId !== null) {}
+            var route = Route.routesList[army]
+        }
+    }
+}*/
+
 function launch() {
     if (!silent) {
-        dungeonType = prompt("Фарм.\n 0 - ближайшее, 1 - лес, 2 - руда, 3 - камень, 4 - золото.", "0");
+        dungeonType = prompt("Фарм.\n 0 - ближайшее, 1 - лес, 2 - руда, 3 - камень, 4 - золото.", "1");
         if ("undefined" != typeof dungeonType && dungeonType != null) {
             dungeonType = dungeonType.trim();
-            recipient = prompt("Кормим:", "Greftung");
+            recipient = prompt("Кормим:", "Little Devil");
             hire = prompt("Найм: 1 - лансы, 3 - кава, 6 - алебарды ", "6");
             attack = prompt("Атака: ", "6");
-            armyminimum = prompt("Минимальнай отряд: ", "150");
+            armyminimum = prompt("Минимальнай отряд: ", "140");
             setTimeout(execute, 1000);
         }
     } else {
+        //detectFarmingArmies();
         setTimeout(execute, 1000);
     }
 }
