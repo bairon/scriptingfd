@@ -359,7 +359,6 @@ async function feed() {
 }
 
 async function execute() {
-    let fmm = getFarmingMatrix();
 
     if (farmingArmiesNotAtHome() === 0) {
         if (needReload) {
