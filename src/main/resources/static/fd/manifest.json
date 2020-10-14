@@ -1,13 +1,14 @@
 
 {
   "manifest_version": 2,
-  "version": "0.0.0.1",
+  "version": "0.0.0.2",
   "name": "fdsmouldmaik",
   "content_scripts": [
     {
       "run_at": "document_end",
-      "matches": ["https://s4.feodal.feogames.ru/frontend/view/*"],
+      "matches": ["https://*.feodal.feogames.ru/*"],
       "js": ["fd.js"]
     }
-  ]
+  ],
+  "web_accessible_resources": ["extension4.js"]
 }
