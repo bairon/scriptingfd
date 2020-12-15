@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "run_at": "document_end",
-      "matches": ["https://*.feodal.feogames.ru/*"],
+      "matches": ["https://s4.feodal.feogames.ru/*"],
       "js": ["fd.js"]
     }
   ],

@@ -1,13 +1,15 @@
-let baseDelay = 400;
-let silent = false;
-let needReload = false;
-let dungeonType;
+let silent = true;
+let dungeonType = 1;
 let recipient;
-let hire = true;
-let attack = 0;
-let armyMinimum;
-let autoDungeon;
+let hire = 6;
+let attack = 6;
+let armyMinimum = [0, 220, 220, 350, 150];
 let keepPercent = 50;
+
+let baseDelay = 400;
+let needReload = false;
+let autoDungeon = false;
+let dungeon;
 
 function rndBase() {
     return Math.round(Math.random() * baseDelay + baseDelay);
@@ -174,41 +176,60 @@ async function buildqueue() {
         if (canBuild(2)) {
             build(2);
             await sleep(rndLong());
-        } else if (canBuild(10)) {
-            build(10);
-            await sleep(rndLong());
-        } else if (canBuild(4)) {
-            build(4);
-            await sleep(rndLong());
-        } else if (canBuild(12)) {
-            build(12);
-            await sleep(rndLong());
-        } else {
-            gameController.townControl.__leftWindow.setTab('buildings-military');
-            await sleep(rndShort());
-            if (canBuild(14)) {
-                build(14);
+            /*} else if (canBuild(10)) {
+                build(10);
+                await sleep(rndLong());
+            } else if (canBuild(4)) {
+                build(4);
+                await sleep(rndLong());
+            } else if (canBuild(12)) {
+                build(12);
                 await sleep(rndLong());
             } else {
-                gameController.townControl.__leftWindow.setTab('buildings-economic');
+                gameController.townControl.__leftWindow.setTab('buildings-military');
                 await sleep(rndShort());
-                if (canBuild(5)) {
-                    build(5);
+                if (canBuild(14)) {
+                    build(14);
                     await sleep(rndLong());
-                }
-            }
+                } else {
+                    gameController.townControl.__leftWindow.setTab('buildings-economic');
+                    await sleep(rndShort());
+                    if (canBuild(5)) {
+                        build(5);
+                        await sleep(rndLong());
+                    }
+                }*/
         }
     }
 }
 
+function hasResourceForHiring(r) {
+    return r.wood >= 300 && r.iron >= 300 && r.stone >= 100 && r.gold >= 200;
+}
+
 async function hirequeue() {
-    if (hire !== undefined && hire !== null && Object.keys(townModel.townData.RecruitingList).length < 2) {
-        $('.town-control-window div[type="troops"]')[0].click();
-        await sleep(rndMedium());
-        $('div[troop-id="' + hire + '"] .max')[0].click();
-        await sleep(rndMedium());
-        $('div[troop-id="' + hire + '"] .recruit')[0].click();
-        await sleep(rndMedium());
+    if (hire !== undefined && hire !== null && !Number.isNaN(hire) && townModel.townData.FreePeople > 0 && Object.keys(townModel.townData.RecruitingList).length < 2
+        && hasResourceForHiring(playerModel.playerData.Resources)) {
+        let tab;
+        if (hire === 1 || hire === 2 || hire === 5 || hire === 6) tab = 1;
+        if (hire === 3 || hire === 4) tab = 2;
+        if (hire === 7 || hire === 8) tab = 3;
+        gameController.townControl.show(8, 6, tab, 1);
+        await sleep(rndShort());
+
+        if ($('div[troop-id="' + hire + '"] .max').length > 0) {
+            $('div[troop-id="' + hire + '"] .max')[0].click();
+            await sleep(rndMedium());
+            if ($('div[troop-id="' + hire + '"] .recruit').length > 0) {
+                $('div[troop-id="' + hire + '"] .recruit')[0].click();
+                await sleep(rndMedium());
+            }
+        }
+
+        gameController.townControl.close();
+        await sleep(rndShort());
+
+
     }
 }
 
@@ -234,6 +255,22 @@ async function dismissAll() {
     await dismissOne();
     await dismissOne();
     await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
+    await dismissOne();
 
 }
 
@@ -247,14 +284,34 @@ function troopsQty(troops, types) {
     }
     return qty;
 }
+const appendTroops = (...a) => a                         // take all parameters
+        .map(Object.entries)                  // get entries
+        .reduce((a, b) => [...a, ...b], [])   // flat entries
+        .reduce((o, [k, v]) => {
+            o[k] = v && typeof v === 'object' // assign if object
+                ? appendTroops(o[k] || {}, v)          //   result of recursive call
+                : (o[k] || 0) + v;            //   or sum the value
+            return o;
+        }, {});
 
-function getFarmingMatrix() {
+function summArmies(troops, armies) {
+    let allTroops = {};
+    allTroops = appendTroops(allTroops, troops);
+    Object.values(armies).forEach(function(a) {
+       allTroops = appendTroops(allTroops, a.Troops);
+    });
+    return allTroops;
+}
+
+function getFarmingMatrix(dungeon) {
+
     let farmingMatrix = [];
-    let allTroops = townModel.townData.Troops;
-    let types = (attack === 0) ? ['1', '2', '3', '4', '5', '6', '7', '8'] : [attack];
+
+    let allTroops = summArmies(townModel.townData.Troops, townModel.townData.Armies);
+    let types = (attack === 0) ? ['1', '2', '3', '4', '5', '6', '7', '8'] : [attack.toString()];
     let qty = troopsQty(allTroops, types);
 
-    let armiesCount = Math.floor(qty / armyMinimum);
+    let armiesCount = Math.floor(qty / armyMinimum[dungeon.t]);
 
     let usedTroops = {};
     for (let t in allTroops) {
@@ -289,8 +346,7 @@ function getFarmingMatrix() {
     return farmingMatrix;
 }
 
-async function createArmies() {
-    let farmingMatrix = getFarmingMatrix();
+async function createArmies(farmingMatrix) {
 
     initRnd();
     $('.town-control-window div[type="createArmy"]')[0].click();
@@ -308,17 +364,45 @@ async function createArmies() {
     await createArmy(farmingMatrix[8]);
     await createArmy(farmingMatrix[9]);
     await createArmy(farmingMatrix[10]);
+    await createArmy(farmingMatrix[11]);
+    await createArmy(farmingMatrix[12]);
+    await createArmy(farmingMatrix[13]);
+    await createArmy(farmingMatrix[14]);
+    await createArmy(farmingMatrix[15]);
+    await createArmy(farmingMatrix[16]);
+    await createArmy(farmingMatrix[17]);
+    await createArmy(farmingMatrix[18]);
+    await createArmy(farmingMatrix[19]);
+    await createArmy(farmingMatrix[20]);
+    await createArmy(farmingMatrix[21]);
+    await createArmy(farmingMatrix[22]);
+    await createArmy(farmingMatrix[23]);
+    await createArmy(farmingMatrix[24]);
+    await createArmy(farmingMatrix[25]);
 
 }
 
 async function feed() {
-    if (recipient !== undefined && recipient !== null) {
+    if (recipient !== undefined && recipient !== null && recipient !== '') {
+        let freecap = Object.keys(townModel.townData.Armies).length * 1000;
+        let mainfreecap = Object.keys(townModel.townData.Armies).length * 3000;
         let keep = {
-            wood: playerModel.playerData.Resources.woodMax * keepPercent / 100,
-            iron: playerModel.playerData.Resources.ironMax * keepPercent / 100,
-            stone: playerModel.playerData.Resources.stoneMax * keepPercent / 100,
-            gold: playerModel.playerData.Resources.goldMax * keepPercent / 100
+            wood: playerModel.playerData.Resources.woodMax - freecap,
+            iron: playerModel.playerData.Resources.ironMax - freecap,
+            stone: playerModel.playerData.Resources.stoneMax - freecap,
+            gold: playerModel.playerData.Resources.goldMax - freecap
         };
+        if (dungeon !== undefined && !(dungeonType > 0 && dungeonType < 5)) {
+            dungeonType = dungeon.t;
+        }
+        if (dungeonType === 1) keep.wood = playerModel.playerData.Resources.woodMax * keepPercent / 100;
+        if (dungeonType === 2) keep.iron = playerModel.playerData.Resources.ironMax  * keepPercent / 100;
+        if (dungeonType === 3) keep.stone = playerModel.playerData.Resources.stoneMax  * keepPercent / 100;
+        if (dungeonType === 4) keep.gold = playerModel.playerData.Resources.goldMax  * keepPercent / 100;
+        keep.wood = greaterOrZero(keep.wood);
+        keep.iron = greaterOrZero(keep.iron);
+        keep.stone = greaterOrZero(keep.stone);
+        keep.gold = greaterOrZero(keep.gold);
         let wood = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.wood - keep.wood)));
         let iron = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.iron - keep.iron)));
         let stone = roundLessBy1000(greaterOrZero(parseInt(playerModel.playerData.Resources.stone - keep.stone)));
@@ -358,24 +442,39 @@ async function feed() {
 
 }
 
-async function execute() {
+function troopsInTown() {
+    let allTroops = townModel.townData.Troops;
+    let types = (attack === 0) ? ['1', '2', '3', '4', '5', '6', '7', '8'] : [attack.toString()];
+    return troopsQty(allTroops, types);
+}
 
+async function execute() {
+    try {
+        await hirequeue();
+    } catch (e){}
+    if (needReload) {
+        location.reload();
+    }
     if (farmingArmiesNotAtHome() === 0) {
-        if (needReload) {
-            location.reload();
-        }
-        //$('#town-control-button')[0].click();
+        if (Math.random() < 0.3) location.reload();
         gameController.townControl.show();
         await sleep(rndShort());
 
         //await buildqueue();
 
-        await hirequeue();
 
         if (attack !== undefined && attack !== null) {
-            await dismissAll();
+            if (autoDungeon) {
+                dungeonType = dungeonTypeByLeastResourcePercent(playerModel.playerData.Resources);
+            }
+            dungeon = findDungeon(gameController.gameData.map, townModel.townData.Location).dungeon;
 
-            await createArmies();
+            let farmingMatrix = getFarmingMatrix(dungeon);
+            if (farmingMatrix.length !== Object.keys(townModel.townData.Armies).length || troopsInTown() > 2) {
+                await dismissAll();
+
+                await createArmies(farmingMatrix);
+            }
 
             gameController.townControl.close();
 
@@ -385,10 +484,6 @@ async function execute() {
 
             await sleep(rndLong());
 
-            if (autoDungeon) {
-                dungeonType = dungeonTypeByLeastResourcePercent(playerModel.playerData.Resources);
-            }
-            dungeon = findDungeon(gameController.gameData.map, townModel.townData.Location).dungeon;
             if (dungeon !== undefined) {
 
                 gameController.goToMapPosition({left: dungeon.x, top: dungeon.y});
@@ -399,17 +494,38 @@ async function execute() {
 
                 await sleep(rndLong());
 
+                var countArmies = $('.attack.send').length;
                 await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-                await attackSend();
-
+                if ($('.attack.send').length === countArmies) {
+                    needReload = true;
+                } else {
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                    await attackSend();
+                }
 
                 $('.close-button')[0].click();
                 await sleep(rndShort());
@@ -419,34 +535,26 @@ async function execute() {
         }
 
         await feed();
-        needReload = false;//Math.random() * 100 <= 20 || farmingArmiesNotAtHome() > 1;
-    }
-    setTimeout(execute, 20000);
-}
 
-/*function detectFarmingArmies() {
-    for (const armyid in townModel.townData.Armies) {
-        var army = townModel.townData.Armies[armyid];
-        if (army.Status) {
-            if (army.RouteId !== undefined && army.RouteId !== null) {}
-            var route = Route.routesList[army]
-        }
+        playerController.switchToNextTown();
     }
-}*/
+    setTimeout(execute, 60000);
+}
 
 function launch() {
     if (!silent) {
         dungeonType = parseInt(prompt("Фарм.\n 0 - ближайшее, 1 - лес, 2 - руда, 3 - камень, 4 - золото, 5 - автоопределение", "5").trim());
         if ("undefined" != typeof dungeonType && dungeonType != null) {
             if (dungeonType === 5) autoDungeon = true;
-            recipient = prompt("Кормим:", "Greftung");
+            recipient = prompt("Кормим:", "");
             hire = parseInt(prompt("Найм: 1 - ланс, 2 - меч, 3 - кава, 4 - рык, 5 - пика, 6 - бард, 7 - лук, 8 - арба", "6"));
             attack = parseInt(prompt("Фарм юнитами: 1 - ланс, 2 - меч, 3 - кава, 4 - рык, 5 - пика, 6 - бард, 7 - лук, 8 - арба, 0 - все", "0"));
             armyMinimum = parseInt(prompt("Минимальнай отряд: ", "100"));
             setTimeout(execute, 1000);
+            localStorage['recipient'] = recipient;
         }
     } else {
-        //detectFarmingArmies();
+        if (dungeonType === 5) autoDungeon = true;
         setTimeout(execute, 1000);
     }
 }
